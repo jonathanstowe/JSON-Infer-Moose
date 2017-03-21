@@ -6,7 +6,7 @@ use warnings;
 our $VERSION = '0.1';
 
 use Moose;
-
+use File::Slurp;
 
 =head1 NAME
 
@@ -19,7 +19,7 @@ JSON::Infer::Moose - Infer Moose Classes from JSON objects
 
 =head1 DESCRIPTION
 
-This provides a mechanism for creating some stub Moose classes from 
+This provides a mechanism for creating some stub Moose classes from
 the return of a REST Call.
 
 =head2 METHODS
@@ -49,77 +49,84 @@ attributes will have a name based on this and the name of the attribute.
 
 =cut
 
-
 =back
 
 
 =cut
 
-sub infer
-{
-   my ( $self, @args ) = @_;
+has uri => (
+    is  =>  'ro',
+    isa =>  'Str',
+    predicate   =>  'has_uri',
+);
 
-   my $ret;
+has file => (
+    is  =>  'ro',
+    isa =>  'Str',
+    predicate   =>  'has_file',
+);
 
-   if ( @args  )
-   {
-      my %args = @args;
+has class_name  =>  (
+    is  =>  'ro',
+    isa =>  'Str',
+    default =>  'My::JSON',
+);
 
-      if ( defined(my $uri = $args{uri} ) )
-      {
-         my $resp =  $self->get($uri);
+sub infer {
+    my ( $self ) = @_;
+    require JSON::Infer::Moose::Class;
+    return JSON::Infer::Moose::Class->new_from_data( $self->class_name, $self->get_content );
+}
 
-         if ($resp->is_success() )
-         {
-            require JSON::Infer::Moose::Class;
+sub get_content {
+    my ( $self ) = @_;
 
-            my $name = $args{class_name} || 'My::JSON';
+    my $json;
+    if ( $self->has_uri ) {
+        my $resp = $self->get($self->uri);
 
-            my $content = $self->decode_json($resp->decoded_content());
-
-            $ret = JSON::Infer::Moose::Class->new_from_data($name, $content);
-         }
-         else
-         {
-         }
-      }
-      else
-      {
-      }
-
-   }
-
-   return $ret;
+        if ( $resp->is_success() ) {
+            $json = $resp->decoded_content();
+        }
+        else {
+            die "couldn't retrieve json";
+        }
+    }
+    elsif ( $self->has_file ) {
+        require File::Slurp;
+        File::Slurp->import;
+        $json = read_file($self->file);
+    }
+    else {
+        die "need one of 'uri' or 'file'\n";
+    }
+    return $self->decode_json($json);
 }
 
 =item ua
 
-The L<LWP::UserAgent> that will be used. 
+The L<LWP::UserAgent> that will be used.
 
 =cut
 
-has ua   => (
-               is => 'rw',
-               isa   => 'LWP::UserAgent',
-               lazy  => 1,
-               builder  => '_get_ua',
-               handles  => [qw(get)],
-            );
+has ua => (
+    is      => 'rw',
+    isa     => 'LWP::UserAgent',
+    lazy    => 1,
+    builder => '_get_ua',
+    handles => [qw(get)],
+);
 
-sub _get_ua
-{
-   my ( $self ) = @_;
-   require LWP::UserAgent;
+sub _get_ua {
+    my ($self) = @_;
+    require LWP::UserAgent;
 
-   my $ua = LWP::UserAgent->new(
-      default_headers   => $self->headers(), 
-      agent => __PACKAGE__ . '/' . $VERSION,
-   );
+    my $ua = LWP::UserAgent->new(
+        default_headers => $self->headers(),
+        agent           => __PACKAGE__ . '/' . $VERSION,
+    );
 
-
-
-
-   return $ua;
+    return $ua;
 }
 
 =item headers
@@ -130,23 +137,22 @@ LWP::UserAgent object.
 =cut
 
 has headers => (
-                  is => 'rw',
-                  isa   => 'HTTP::Headers',
-                  lazy  => 1,
-                  builder  => '_get_headers',
-               );
+    is      => 'rw',
+    isa     => 'HTTP::Headers',
+    lazy    => 1,
+    builder => '_get_headers',
+);
 
-sub _get_headers
-{
-   my ( $self ) = @_;
+sub _get_headers {
+    my ($self) = @_;
 
-   require HTTP::Headers;
+    require HTTP::Headers;
 
-   my $h = HTTP::Headers->new();
-   $h->header('Content-Type'  => $self->content_type());
-   $h->header('Accept'  => $self->content_type());
+    my $h = HTTP::Headers->new();
+    $h->header( 'Content-Type' => $self->content_type() );
+    $h->header( 'Accept'       => $self->content_type() );
 
-   return $h;
+    return $h;
 }
 
 =item content_type
@@ -156,12 +162,11 @@ This is the content type that we want to use.  The default is
 
 =cut
 
-has content_type  => (
-                        is => 'rw',
-                        isa   => 'Str',
-                        default  => "application/json",
-                     );
-
+has content_type => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => "application/json",
+);
 
 =item json_parser
 
@@ -169,28 +174,26 @@ This returns a JSON parser object.
 
 =cut
 
-has json_parser   => (
-                        is => 'rw',
-                        isa   => 'JSON',
-                        lazy  => 1,
-                        builder  => '_get_json',
-                        handles  => {
-                           decode_json => 'decode',
-                           encode_json => 'encode',
-                        },
-                     );
+has json_parser => (
+    is      => 'rw',
+    isa     => 'JSON',
+    lazy    => 1,
+    builder => '_get_json',
+    handles => {
+        decode_json => 'decode',
+        encode_json => 'encode',
+    },
+);
 
-sub _get_json
-{
-   my ( $self ) = @_;
+sub _get_json {
+    my ($self) = @_;
 
-   require JSON;
+    require JSON;
 
-   my $json = JSON->new();
+    my $json = JSON->new();
 
-   return $json;
+    return $json;
 }
-
 
 =back
 
