@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use JSON::Infer::Moose;
+use Getopt::Long;
+
+my $opts = {};
+
+GetOptions($opts, "url=s", "file=s", "dir=s", "class_name=s");
+
+
+
+my $j = JSON::Infer::Moose->new($opts);
+
+$j->make_classes;
+
