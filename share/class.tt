@@ -1,0 +1,13 @@
+package [% class.name %];
+
+use Moose;
+
+[% FOR attribute IN class.attributes %]
+has [% attribute.name %] => (
+    is          =>  'ro',
+    isa         =>  '[% attribute.type_constraint %]',
+    init_arg    =>  '[% attribute.name %]',
+);
+[% END %]
+
+1;
