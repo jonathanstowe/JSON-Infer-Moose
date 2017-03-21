@@ -72,6 +72,12 @@ has class_name  =>  (
     default =>  'My::JSON',
 );
 
+has dir =>  (
+    is  =>  'ro',
+    isa =>  'Str',
+    default =>  'lib',
+);
+
 sub infer {
     my ( $self ) = @_;
     require JSON::Infer::Moose::Class;
@@ -193,6 +199,60 @@ sub _get_json {
     my $json = JSON->new();
 
     return $json;
+}
+
+has classes =>  (
+    is =>   'ro',
+    isa =>  'ArrayRef',
+    lazy    =>  1,
+    auto_deref  =>  1,
+    builder =>  '_build_classes',
+);
+
+sub _build_classes {
+    my ( $self ) = @_;
+
+    my $j = $self->infer;
+    my @classes = ( $j, $j->classes );
+
+    return \@classes;
+}
+
+sub make_classes {
+    my ( $self ) = @_;
+
+    require Path::Class;
+
+    my $dir = Path::Class::dir($self->dir);
+
+    for my $class ( $self->classes ) {
+        my $file = $dir->file($class->path);
+        $file->dir->mkpath;
+        my $h = $file->openw;
+        $self->process_template('class.tt', { class => $class }, $h);
+        $h->close;
+    }
+
+}
+
+use Template;
+has template => (
+    is      =>  'ro',
+    isa     =>  'Template',
+    lazy    =>  1,
+    builder =>  '_build_template',
+    handles =>  {
+        process_template    =>  'process',
+    }
+);
+
+sub _build_template {
+    my ( $self ) = @_;
+
+    require File::ShareDir;
+    my $sh = File::ShareDir::dist_dir('JSON-Infer-Moose');
+    my $p = "share:$sh";
+    return Template->new({ INCLUDE_PATH => $p });
 }
 
 =back
