@@ -3,7 +3,6 @@ package JSON::Infer::Moose::Role::Types;
 use strict;
 use warnings;
 
-
 use Moose::Role;
 
 =head1 NAME
@@ -21,16 +20,16 @@ JSON::Infer::Moose::Role::Types
 =cut
 
 has types => (
-                  is => 'rw',
-                  isa   => 'ArrayRef[JSON::Infer::Moose::Types]',
-                  traits   => [qw(Array)],
-                  auto_deref  => 1,
-                  default  => sub { [] },
-                  handles  => {
-                     all_types   => 'elements',
-                     _add_type  => 'push',
-                  },
-               );
+   is         => 'rw',
+   isa        => 'ArrayRef[JSON::Infer::Moose::Types]',
+   traits     => [qw(Array)],
+   auto_deref => 1,
+   default    => sub { [] },
+   handles    => {
+      all_types => 'elements',
+      _add_type => 'push',
+   },
+);
 
 =item add_types
 
@@ -38,7 +37,7 @@ This takes and object of this role and adds it's types to my types.
 
 =cut
 
-sub  add_types
+sub add_types
 {
    my ( $self, $object ) = @_;
 
@@ -55,7 +54,6 @@ sub  add_types
       $self->_add_type($object);
    }
 }
-
 
 =back
 

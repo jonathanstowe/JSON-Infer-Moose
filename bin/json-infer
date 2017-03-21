@@ -8,7 +8,7 @@ use Getopt::Long;
 
 my $opts = {};
 
-GetOptions($opts, "url=s", "file=s", "dir=s", "class_name=s");
+GetOptions($opts, "uri=s", "file=s", "dir=s", "class_name=s");
 
 
 

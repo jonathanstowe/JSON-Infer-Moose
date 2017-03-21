@@ -5,7 +5,6 @@ use warnings;
 
 use Moose::Role;
 
-
 =head1 NAME
 
 JSON::Infer::Moose::Role::Entity
@@ -23,10 +22,9 @@ Role for common items between classes (name etc.)
 =cut
 
 has name => (
-               is => 'rw',
-               isa   => 'Str',
-            );
-
+   is  => 'rw',
+   isa => 'Str',
+);
 
 =back
 

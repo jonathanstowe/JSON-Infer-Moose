@@ -5,8 +5,8 @@ use warnings;
 
 use Moose;
 with qw(
-         JSON::Infer::Moose::Role::Entity
-       );
+  JSON::Infer::Moose::Role::Entity
+);
 
 =head1 NAME
 
@@ -34,11 +34,10 @@ undefined if this doesn't require to be a subtype.
 =cut
 
 has subtype_of => (
-                     is => 'rw',
-                     isa   => 'Maybe[Str]',
-                     predicate   => 'has_subtype',
-                  );
-
+   is        => 'rw',
+   isa       => 'Maybe[Str]',
+   predicate => 'has_subtype',
+);
 
 =item array 
 
@@ -47,11 +46,11 @@ an array type.  This has a bearing on the coercion being created.
 
 =cut
 
-has array   => (
-                  is => 'rw',
-                  isa   => 'Bool',
-                  default  => 0,
-               );
+has array => (
+   is      => 'rw',
+   isa     => 'Bool',
+   default => 0,
+);
 
 =item of_class
 
@@ -59,10 +58,10 @@ This is the L<JSON::Infer::Moose::Class> that this type is for.
 
 =cut
 
-has of_class   => (
-                     is => 'rw',
-                     isa   => 'JSON::Infer::Moose::Class',
-                  );
+has of_class => (
+   is  => 'rw',
+   isa => 'JSON::Infer::Moose::Class',
+);
 
 =back
 

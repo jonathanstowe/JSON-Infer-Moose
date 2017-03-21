@@ -249,13 +249,32 @@ has template => (
 sub _build_template {
     my ( $self ) = @_;
 
+    return Template->new({ INCLUDE_PATH => $self->template_path });
+}
+
+has template_path => (
+    is  =>  'ro',
+    isa => 'Str',
+    lazy    =>  1,
+    builder =>  '_build_template_path',
+);
+
+sub _build_template_path {
     require File::ShareDir;
-    my $sh = File::ShareDir::dist_dir('JSON-Infer-Moose');
-    my $p = "share:$sh";
-    return Template->new({ INCLUDE_PATH => $p });
+    require File::HomeDir;
+
+    my $path = join ':', grep { defined $_ } (
+        'share',
+        File::HomeDir->my_dist_data('JSON-Infer-Moose'),
+        eval { File::ShareDir::dist_dir('JSON-Infer-Moose') },
+    );
+
+    return $path;
+
 }
 
 =back
+
 
 
 =head1 BUGS
