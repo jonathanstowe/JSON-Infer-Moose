@@ -66,12 +66,15 @@ sub infer_from_value
       }
       elsif ( ref($value) )
       {
-          if (reftype($value) eq 'ARRAY') 
+          if (reftype($value) eq 'ARRAY')
           {
+              $self->is_array(1);
              if (any { ref($_) } @{$value} )
              {
                my $obj = $self->process_object($value);
                $type_constraint = 'ArrayRef[' . $obj->name() . ']';
+               $self->item_class($obj->name);
+               $self->should_coerce(1);
              }
              else
              {
@@ -82,6 +85,8 @@ sub infer_from_value
           {
              my $obj = $self->process_object($value);
              $type_constraint = $obj->name();
+             $self->is_object(1);
+             $self->should_coerce(1);
           }
 
       }
@@ -152,6 +157,29 @@ has type_constraint  => (
 
 
 
+has is_array => (
+    is  =>  'rw',
+    isa =>  'Bool',
+    default =>  0,
+
+);
+
+has item_class => (
+    is  =>  'rw',
+    isa =>  'Str',
+);
+
+has is_object => (
+    is  =>  'rw',
+    isa =>  'Bool',
+    default =>  0,
+);
+
+has should_coerce => (
+    is  =>  'rw',
+    isa =>  'Bool',
+    default =>  0,
+);
 
 =item class
 
@@ -178,7 +206,7 @@ has child_class_name => (
       builder  => '_get_child_class_name',
 );
 
-sub _get_child_class_name 
+sub _get_child_class_name
 {
    my ( $self ) = @_;
 

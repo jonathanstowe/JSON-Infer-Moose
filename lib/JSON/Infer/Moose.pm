@@ -249,7 +249,7 @@ has template => (
 sub _build_template {
     my ( $self ) = @_;
 
-    return Template->new({ INCLUDE_PATH => $self->template_path });
+    return Template->new({ INCLUDE_PATH => $self->template_path, TRIM => 1 });
 }
 
 has template_path => (

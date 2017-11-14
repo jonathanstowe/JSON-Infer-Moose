@@ -1,11 +1,33 @@
 package [% class.name %];
 
 use Moose;
+use Moose::Util::TypeConstraints;
 
 [% FOR attribute IN class.attributes %]
+[% IF attribute.should_coerce %]
+    [% IF attribute.is_object %]
+class_type '[% attribute.type_constraint %]';
+coerce '[% attribute.type_constraint %]',
+from 'HashRef',
+via {
+    require [% attribute.type_constraint %];
+    [% attribute.type_constraint %]->new($_);
+};
+    [% ELSIF attribute.is_array %]
+coerce '[% attribute.type_constraint %]',
+from 'ArrayRef[HashRef]',
+via {
+    require [% attribute.item_class %];
+    my @items = @$_;
+    [ map { [% attribute.item_class %]->new($_) } @items ];
+};
+    [% END %]
+
+[% END %]
 has [% attribute.name %] => (
     is          =>  'ro',
     isa         =>  '[% attribute.type_constraint %]',
+[% IF attribute.should_coerce %]    coerce      =>  1,[% END %]
     init_arg    =>  '[% attribute.name %]',
 );
 [% END %]
