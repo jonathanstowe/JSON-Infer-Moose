@@ -26,7 +26,7 @@ via {
 
 [% END %]
 
-has [% attribute.name %] => (
+has [% attribute.perl_name %] => (
     is          =>  'ro',
     isa         =>  '[% attribute.type_constraint %]',
 [% IF attribute.should_coerce %]

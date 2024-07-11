@@ -143,6 +143,31 @@ has name => (
                isa   => 'Str',
             );
 
+=item perl_name
+
+=cut
+
+has perl_name => (
+    is      =>  'ro',
+    isa     =>  'Str',
+    lazy    =>  1,
+    builder =>  '_build_perl_name',
+);
+
+sub _build_perl_name {
+    my ($self) = @_;
+
+    my $s = $self->name;
+
+    $s =~ s{([a-zA-Z][a-zA-Z0-9]*([a-z0-9]|\b))}{
+        my $replaced = 0;
+        ($a = $1) =~ s<(^[A-Z]+|(?![a-z])[A-Z]+)>< $replaced = 1; "_" . lc $1; >eg;
+        ($replaced ? substr $a, 1 : $a);
+    }eg;
+    return $s;
+}
+
+
 
 =item type_constraint
 

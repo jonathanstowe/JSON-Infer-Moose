@@ -10,7 +10,7 @@ lib/JSON/Infer/Moose/Role/Types.pm
 lib/JSON/Infer/Moose/Type.pm
 LICENSE
 MANIFEST			This list of files
-README
+README.md
 t/001_load.t
 t/002_attribute.t
 t/003_class.t
